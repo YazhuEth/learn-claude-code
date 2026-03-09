@@ -301,15 +301,6 @@ Here are some of the most useful skills to install:
 | **skill-creator** | (auto) | Interactive guide to create your own skills |
 | **claude-api** | (auto) | Patterns for building with the Claude API |
 
-#### `/simplify` — Your Code Quality Buddy
-
-After writing code, run `/simplify`. It:
-1. Looks at your recently modified code
-2. Checks for reuse opportunities, code quality, and efficiency
-3. Fixes any issues it finds automatically
-
-It's like having a code reviewer that also fixes things.
-
 #### Creating Your Own Skills
 
 A skill is just a folder with a `SKILL.md` file. Here's the minimal structure:

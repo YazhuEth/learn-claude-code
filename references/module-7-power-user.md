@@ -167,14 +167,6 @@ DESCRIPTION=$(echo "$DIFF" | claude --print "write a PR description for these ch
 gh pr create --title "Feature: ..." --body "$DESCRIPTION"
 ```
 
-### `--resume` and `--continue`
-```bash
-claude --continue     # Pick up the most recent session
-claude --resume       # Choose from recent sessions
-```
-
-This is great for long tasks: close the terminal, come back later, continue where you left off.
-
 ## Session Management
 
 ### `/rename` — Name Your Sessions
