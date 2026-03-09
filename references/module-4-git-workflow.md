@@ -57,17 +57,25 @@ docs(readme): add setup instructions for new contributors
 
 Common types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `style`, `perf`
 
-### Want a dedicated /commit command?
+### Want dedicated git commands?
 
-`/commit` is **not built-in** — it's an installable **skill**. Many useful slash commands come from skills you can add. To install the commit skill:
+`/commit` and `/commit-push-pr` are **not built-in** — they come from installable **skills and plugins**. Many useful slash commands work this way.
 
+**Option 1: Install the git-commit skill**
 ```bash
 npx skills add anthropics/claude-code-skills --skill git-commit -g -y
 ```
+This gives you `/commit` with auto-detection of type, scope, and description.
 
-After installing, `/commit` becomes available and gives you a more structured commit workflow with auto-detection of type, scope, and description.
+**Option 2: Install the `commit-commands` plugin**
+Use `/plugin install commit-commands@claude-plugins-official` to get:
+- `/commit` — Smart conventional commits
+- `/commit-push-pr` — Commit + push + open a PR in one shot
+- `/clean_gone` — Clean up stale local branches
 
-This is a great example of how **skills extend Claude Code**. You'll learn more about this in Module 6.
+`/commit-push-pr` is a game-changer: one command analyzes your changes, creates a commit, pushes the branch, and opens a PR with a proper description.
+
+This is a great example of how **skills and plugins extend Claude Code**. You'll learn more about this in Module 6.
 
 ### Pro tips
 - Claude reads recent commits to match your project's style
@@ -95,9 +103,12 @@ Claude handles the whole flow. It will:
 ## Pull Requests
 
 ### Creating a PR
-Just say: "create a pull request"
 
-Claude will:
+**The fast way** (if you have the `commit-commands` plugin):
+Just type `/commit-push-pr` — it commits, pushes, and creates the PR all at once.
+
+**The manual way:**
+Say "create a pull request" and Claude will:
 1. Check what's changed vs the base branch
 2. Look at ALL commits (not just the latest)
 3. Draft a title and description
@@ -110,7 +121,7 @@ Say "review PR #123" or paste a PR URL. Claude will:
 - Look at code quality and test coverage
 - Give actionable feedback
 
-Note: There's also a `/review-pr` skill you can install for a more structured review workflow.
+For a more thorough review, install the `pr-review-toolkit` plugin. It launches specialized agents (security, tests, code quality, etc.) that review in parallel.
 
 ## Common Git Scenarios
 

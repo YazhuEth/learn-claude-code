@@ -43,8 +43,13 @@ These are commands you type directly in Claude Code:
 | `/compact` | Compress the conversation to save context space |
 | `/status` | Show current session info |
 | `/mcp` | List connected MCP servers and their tools |
+| `/plugin` | Browse, install, and manage plugins |
 | `/model` | Switch between models (Opus, Sonnet, Haiku) |
 | `/fast` | Toggle fast mode (same model, faster output) |
+| `/context` | See what Claude has loaded (skills, agents, files) |
+| `/usage` | Check your plan usage |
+| `/rename` | Name the current session for easy resuming |
+| `/loop` | Run a prompt on a recurring interval (e.g., every 5m) |
 
 Other built-in commands: `/login`, `/logout`, `/doctor` (diagnose issues), `/config`.
 

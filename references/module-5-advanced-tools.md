@@ -3,7 +3,7 @@
 ## What You'll Learn
 - Agents and subagents
 - Plan Mode for complex tasks
-- MCP Servers for external integrations
+- MCP Servers and the Plugin ecosystem
 - Task management with TodoWrite
 
 ## Agents: Your AI Team
@@ -17,6 +17,8 @@ Agents are specialized sub-instances of Claude that handle specific tasks. Think
 | **Explore** | Deep codebase exploration | "How does auth work in this project?" |
 | **Plan** | Architecture and planning | "Design the implementation for feature X" |
 | **websearch** | Web search | "What's the latest React Router API?" |
+| **code-reviewer** | Code review | Reviewing PRs and code quality |
+| **code-simplifier** | Simplify code | Clean up and refine recently written code |
 | **action** | Conditional task execution | Batch operations with conditions |
 
 ### How Agents Work
@@ -33,6 +35,8 @@ Agents run **in parallel**. Claude can launch multiple agents at once for indepe
 
 Example: "Review this PR for security issues, test coverage, and code quality"
 → Claude can launch 3 agents simultaneously, each focusing on one aspect.
+
+Some agents can even run in **isolated worktrees** — their own copy of the repo — so they can make changes without affecting your current work.
 
 ## Plan Mode
 
@@ -55,25 +59,81 @@ Plan Mode lets Claude explore and design a solution BEFORE writing any code. Thi
 For anything non-trivial, say: "Plan this first before implementing."
 This saves time and prevents wasted work.
 
-## MCP Servers: External Integrations
+## MCP Servers & Plugins: External Integrations
 
-MCP (Model Context Protocol) lets Claude Code connect to external tools and services.
+MCP (Model Context Protocol) lets Claude Code connect to external tools and services. **Plugins** are the easy way to install and manage MCP servers — no manual JSON config needed.
 
-### What MCP Can Do
-- **Database tools** - Query PostgreSQL, MySQL directly
-- **Browser automation** - Playwright for testing and scraping
-- **Cloud services** - AWS, Supabase management
-- **Design tools** - Figma, Pencil design files
-- **Documentation** - Live docs from Context7
-- **Communication** - Slack, GitHub integrations
+### The Plugin System
 
-### Checking Your MCP Servers
-Type `/mcp` to see what's connected. Each MCP server provides tools that Claude can use.
+Plugins bundle MCP servers, slash commands, subagents, and hooks into one installable package. Think of them as "apps" for Claude Code.
+
+**Managing plugins:**
+- `/plugin` — Opens the plugin manager (Discover / Installed / Marketplaces / Errors)
+- `/mcp` — See connected MCP servers and their tools
+
+### Official Plugins (Pre-built, Zero Config)
+
+These come from Anthropic's official marketplace and install with one click:
+
+**Source Control & Project Management:**
+| Plugin | What it does |
+|--------|-------------|
+| `github` | Issues, PRs, code search, file management |
+| `gitlab` | GitLab integration |
+| `linear` | Issue tracking |
+| `notion` | Pages, databases, search |
+| `atlassian` | Jira & Confluence |
+| `asana` | Task management |
+
+**Infrastructure & Services:**
+| Plugin | What it does |
+|--------|-------------|
+| `vercel` | Deploy, logs, project management |
+| `supabase` | Database & auth management |
+| `firebase` | Firebase management |
+| `sentry` | Error monitoring |
+| `slack` | Messaging integration |
+| `figma` | Design file access |
+
+**Development Workflow:**
+| Plugin | What it does |
+|--------|-------------|
+| `commit-commands` | `/commit`, `/commit-push-pr`, branch cleanup |
+| `pr-review-toolkit` | Specialized PR review agents |
+| `agent-sdk-dev` | Build with the Claude Agent SDK |
+
+**LSP (Language Server) Plugins:**
+These give Claude real-time type errors and go-to-definition for your language:
+`typescript-lsp`, `pyright-lsp`, `rust-analyzer-lsp`, `gopls-lsp`, `clangd-lsp`, and more.
+
+### Installing a Plugin
+
+From the `/plugin` UI, browse and install. Or from the command line:
+```
+/plugin install github@claude-plugins-official
+```
+
+After installing, restart Claude Code to load the new plugin.
+
+### Plugin Scopes
+- **User** (default) — applies to all your projects
+- **Project** — shared via `.claude/settings.json` (team can use it)
+- **Local** — repo-only, not shared
+
+### What MCP Can Do (with or without plugins)
+- **Database tools** — Query PostgreSQL, MySQL directly
+- **Browser automation** — Playwright for testing and scraping
+- **Cloud services** — AWS, Supabase management
+- **Design tools** — Figma, Pencil design files
+- **Documentation** — Live docs from Context7
+- **Communication** — Slack, GitHub integrations
 
 ### Example
-If you have a database MCP server connected:
-"Show me the schema of the users table"
-→ Claude queries the database directly and shows you the schema.
+With the GitHub plugin installed:
+"List all open PRs assigned to me" → Claude queries GitHub directly and shows the results.
+
+With a database MCP server connected:
+"Show me the schema of the users table" → Claude queries the database directly.
 
 ## Task Management
 
@@ -129,8 +189,10 @@ Try one of these:
 1. **Agent exploration**: "Explore this project and tell me the overall architecture - what frameworks are used, how is the code organized, and what are the main features?"
 2. **Web search**: "Search the web for the latest Claude Code features released in 2025"
 3. **Plan mode**: "I want to add a simple logging system to this project. Plan it first before implementing."
+4. **Plugins**: Type `/plugin` to browse available plugins. Try installing one that's relevant to your workflow (e.g., `github` if you use GitHub).
+5. **Check MCP**: Type `/mcp` to see what MCP servers are currently connected.
 
-Pick whichever makes sense for your current project. If you're in an empty directory, option 2 works great.
+Pick whichever makes sense for your current project. If you're in an empty directory, options 2 or 4 work great.
 
 ---
 
@@ -150,7 +212,14 @@ C) They conflict with each other
 
 Answer: B - Parallel agents can explore different parts of a codebase or handle different aspects of a review at the same time.
 
-**Q3: What command shows your connected MCP servers?**
+**Q3: What's the easiest way to add a GitHub integration to Claude Code?**
+A) Manually configure an MCP server in settings.json
+B) Install the `github` plugin via `/plugin`
+C) Write a custom script
+
+Answer: B - The plugin system lets you install pre-configured integrations with zero manual setup. `/plugin` opens the plugin manager.
+
+**Q4: What command shows your connected MCP servers?**
 A) `/servers`
 B) `/tools`
 C) `/mcp`

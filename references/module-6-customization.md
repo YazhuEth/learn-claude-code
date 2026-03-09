@@ -258,9 +258,25 @@ cat ~/.claude/projects/<hash>/memory/MEMORY.md
 
 ## Skills & Plugins
 
-Skills add capabilities. Plugins bundle multiple skills together.
+Claude Code has two extension systems: **Skills** and **Plugins**. They complement each other.
 
-### Finding and Installing Skills
+### Skills vs Plugins
+
+| | Skills | Plugins |
+|---|--------|---------|
+| **What** | Instruction files (SKILL.md) | Bundles of MCP servers, skills, hooks, agents |
+| **Install** | `npx skills add <repo>` | `/plugin` UI or `/plugin install` |
+| **Location** | `~/.claude/skills/` | `~/.claude/plugins/` |
+| **Trigger** | Slash commands or auto-detect | Slash commands, tools, auto-detect |
+| **Examples** | `/commit`, `/simplify` | `github`, `notion`, `pr-review-toolkit` |
+
+### Skills: Slash Commands & Context-Triggered Capabilities
+
+Skills are folders with a `SKILL.md` file that tells Claude how to handle specific tasks. Some are triggered by slash commands, others activate automatically based on context.
+
+This onboarding you're doing right now? It's a skill.
+
+#### Finding and Installing Skills
 ```bash
 # Search for skills
 npx skills search commit
@@ -269,15 +285,113 @@ npx skills search commit
 npx skills add <repo> --skill <name> -g -y
 ```
 
-After installing, skills appear as slash commands or trigger automatically based on context.
-
-### Where Skills Live
+#### Where Skills Live
 - Global: `~/.claude/skills/<skill-name>/`
 - Each skill has a `SKILL.md` file with instructions
+- Skills hot-reload: add or modify a skill and it's available instantly, no restart needed
 
-This onboarding you're doing right now? It's a skill.
+#### Must-Have Skills
 
-### Hands-on: Install your first skill
+Here are some of the most useful skills to install:
+
+| Skill | Slash command | What it does |
+|-------|--------------|-------------|
+| **git-commit** | `/commit` | Smart conventional commits with auto-detection |
+| **find-skills** | (auto) | Helps you discover skills when you ask "is there a skill for X?" |
+| **skill-creator** | (auto) | Interactive guide to create your own skills |
+| **claude-api** | (auto) | Patterns for building with the Claude API |
+
+#### `/simplify` — Your Code Quality Buddy
+
+After writing code, run `/simplify`. It:
+1. Looks at your recently modified code
+2. Checks for reuse opportunities, code quality, and efficiency
+3. Fixes any issues it finds automatically
+
+It's like having a code reviewer that also fixes things.
+
+#### Creating Your Own Skills
+
+A skill is just a folder with a `SKILL.md` file. Here's the minimal structure:
+
+```markdown
+---
+name: my-skill
+description: "What this skill does and when to trigger it"
+---
+
+# My Skill
+
+Instructions for Claude when this skill is activated...
+```
+
+Drop it in `~/.claude/skills/my-skill/SKILL.md` and it's live.
+
+### Plugins: The Integration Ecosystem
+
+Plugins are more powerful than skills — they can include MCP servers, subagents, hooks, and slash commands all in one package.
+
+#### Managing Plugins
+- `/plugin` — Browse, install, and manage plugins
+- `/plugin install <name>@<marketplace>` — Install from command line
+- After installing a plugin, **restart Claude Code** to load it
+
+#### Must-Have Plugins
+
+Here are the most useful plugins from the official marketplace:
+
+| Plugin | Slash commands | What it does |
+|--------|---------------|-------------|
+| `commit-commands` | `/commit`, `/commit-push-pr`, `/clean_gone` | Git commit, push+PR in one shot, branch cleanup |
+| `code-simplifier` | `/simplify` | Reviews recent code for quality, reuse, efficiency — then fixes issues |
+| `pr-review-toolkit` | `/review-pr` | Specialized PR review with parallel agents |
+| `code-review` | `/code-review` | Code review a pull request |
+| `feature-dev` | `/feature-dev` | Guided feature development with architecture focus |
+| `claude-md-management` | `/revise-claude-md` | Update CLAUDE.md with learnings from a session |
+
+Install any of them via `/plugin` or:
+```
+/plugin install commit-commands@claude-plugins-official
+```
+
+#### `/simplify` — Your Code Quality Buddy
+
+After writing code, run `/simplify` (from the `code-simplifier` plugin). It:
+1. Looks at your recently modified code
+2. Checks for reuse opportunities, code quality, and efficiency
+3. Fixes any issues it finds automatically
+
+It's like having a code reviewer that also fixes things.
+
+#### `/commit-push-pr` — Ship in One Command
+
+The `commit-commands` plugin gives you:
+
+| Command | What it does |
+|---------|-------------|
+| `/commit` | Create a smart git commit |
+| `/commit-push-pr` | Commit + push + open a PR in one shot |
+| `/clean_gone` | Clean up local branches deleted on remote |
+
+The `/commit-push-pr` workflow is a game-changer: it analyzes your changes, creates a commit with a good message, pushes the branch, and opens a PR with a proper description — all in one command.
+
+#### The `pr-review-toolkit` Plugin
+
+Installs specialized review agents:
+
+| Command / Agent | What it does |
+|----------------|-------------|
+| `/review-pr` | Full PR review with multiple specialized agents |
+| code-reviewer | Bugs, logic errors, security, code quality |
+| silent-failure-hunter | Finds swallowed errors and bad fallbacks |
+| code-simplifier | Simplifies code while preserving functionality |
+| comment-analyzer | Checks comment accuracy and maintainability |
+| pr-test-analyzer | Reviews test coverage quality |
+| type-design-analyzer | Analyzes type design and invariants |
+
+These agents run in parallel when reviewing a PR, each focusing on a different aspect.
+
+#### Hands-on: Install your first skill
 
 Let's install the `git-commit` skill step by step:
 
@@ -293,6 +407,13 @@ git clone https://github.com/anthropics/claude-code-skills /tmp/cc-skills
 cp -r /tmp/cc-skills/skills/git-commit ~/.claude/skills/
 rm -rf /tmp/cc-skills
 ```
+
+#### Community Skills & Plugins
+
+The ecosystem is growing fast:
+- **Official**: `anthropics/skills` — PDF, DOCX, PPTX, XLSX, webapp testing, and more
+- **Community**: Search `npx skills search <keyword>` or browse curated lists on GitHub
+- **Make your own**: Use the `skill-creator` skill to build custom skills interactively
 
 ## IDE Integrations
 
@@ -352,6 +473,10 @@ Let's set up YOUR config right now:
 
 3. **Create a global CLAUDE.md**: Ask Claude: "Help me create a ~/.claude/CLAUDE.md with my preferences. Ask me questions about my coding style and conventions."
 
+4. **Explore plugins**: Type `/plugin` to see what's available. Try installing the `commit-commands` plugin if you use git regularly.
+
+5. **Try /simplify**: If you have recently modified code, try running `/simplify` to see it in action.
+
 ---
 
 ## Quick Quiz
@@ -376,6 +501,20 @@ B) `allow` always wins
 C) They're the same thing
 
 Answer: A - Deny rules take priority, so you can broadly allow `Bash(git *)` while specifically denying `Bash(git push --force*)`.
+
+**Q4: What does `/commit-push-pr` do?**
+A) Only creates a commit
+B) Commits, pushes, and opens a PR in one command
+C) Only pushes to remote
+
+Answer: B - The `commit-commands` plugin gives you `/commit-push-pr` which handles the entire flow: commit + push + PR creation.
+
+**Q5: What's the difference between a skill and a plugin?**
+A) They're the same thing
+B) Skills are instruction files (SKILL.md), plugins can bundle MCP servers, agents, hooks, and skills together
+C) Plugins are only for VSCode
+
+Answer: B - Skills are lightweight instruction files. Plugins are full packages that can include MCP servers, subagents, hooks, and slash commands.
 
 ---
 

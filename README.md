@@ -25,10 +25,10 @@ That's it. Claude walks you through everything step by step.
 | 1 | The Basics — prompting, slash commands, permissions |
 | 2 | Files & Code — navigate and edit codebases fast |
 | 3 | Bash Essentials — commands, pipes, process management |
-| 4 | Git Workflow — commits, PRs, code review |
-| 5 | Advanced Tools — agents, plan mode, MCP servers |
-| 6 | Customization — CLAUDE.md, memory, hooks |
-| 7 | Power User — context management, automation, workflows |
+| 4 | Git Workflow — commits, PRs, /commit-push-pr |
+| 5 | Advanced Tools — agents, plan mode, MCP plugins |
+| 6 | Customization — CLAUDE.md, memory, skills, plugins, hooks |
+| 7 | Power User — worktrees, workflows, session management, productivity |
 
 Each module has explanations, hands-on exercises, and a quick quiz. Your progress is saved between sessions.
 
