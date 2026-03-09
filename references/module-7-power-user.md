@@ -12,15 +12,30 @@
 Worktrees let you work on multiple branches simultaneously without stashing or switching.
 
 ### How It Works
-Say "start a worktree" and Claude creates an isolated copy of your repo. You can:
-- Work on a feature while keeping your main branch clean
-- Test changes without affecting your current work
-- Run multiple tasks in parallel on different branches
+
+Two ways to use worktrees:
+
+**1. From the CLI:**
+```bash
+claude --worktree    # or -w
+```
+This starts Claude in an isolated git worktree — a separate copy of your repo on its own branch. Your main branch stays clean.
+
+**2. From a conversation:**
+Say "start a worktree" and Claude creates one for you.
+
+Worktrees are created at `<repo>/.claude/worktrees/<n>` with a branch named `worktree-<n>`.
+
+### Agents + Worktrees
+Subagents can also use worktrees. When Claude launches an agent with `isolation: worktree`, that agent gets its own copy of the repo. If the agent makes no changes, the worktree is automatically cleaned up.
+
+This enables true parallel development: multiple agents working on different features simultaneously without interfering with each other.
 
 ### When to Use
 - Exploring a risky refactor while keeping your stable code
 - Working on a hotfix while in the middle of a feature
 - Running long tasks that shouldn't block your main work
+- Parallel agent tasks that need to modify files
 
 ## Context Window Management
 
@@ -57,9 +72,11 @@ For significant features, use this pattern:
 2. **Review the plan**: Check Claude's approach, suggest changes
 3. **Implement in stages**: One piece at a time, verifying as you go
 4. **Test**: "Run the tests and fix any failures"
-5. **Review**: "Review the changes for any issues"
-6. **Commit**: "commit my changes" for a clean commit
-7. **PR**: "Create a PR with a good description"
+5. **Simplify**: Run `/simplify` to clean up the code you just wrote
+6. **Review**: "Review the changes for any issues" (or `/review-pr` for a thorough review)
+7. **Ship it**: Run `/commit-push-pr` to commit, push, and open a PR in one shot
+
+Steps 6-7 replace the old manual flow of commit → push → create PR. One command does it all.
 
 ### The Debug Flow
 When something's broken:
@@ -88,6 +105,22 @@ Be explicit about independent tasks:
 "I need you to: 1) check all API endpoints for auth middleware, 2) find unused dependencies in package.json, 3) list all TODO comments"
 
 Claude recognizes these as independent and launches parallel agents.
+
+## The `/loop` Command
+
+`/loop` is a built-in command that runs a prompt or slash command on a recurring interval. Great for monitoring tasks.
+
+```
+/loop 5m check the deploy status
+/loop 10m /review-pr 42
+/loop 30s run the tests
+```
+
+Default interval is 10 minutes if you don't specify. Use cases:
+- Monitoring a deployment
+- Watching CI/CD status
+- Polling for PR review updates
+- Re-running tests periodically during development
 
 ## Model Selection
 
@@ -142,22 +175,44 @@ claude --resume       # Choose from recent sessions
 
 This is great for long tasks: close the terminal, come back later, continue where you left off.
 
+## Session Management
+
+### `/rename` — Name Your Sessions
+Give your session a descriptive title so you can find it later:
+```
+/rename dark mode feature
+```
+
+### `--resume` and `--continue`
+```bash
+claude --continue     # Pick up the most recent session
+claude --resume       # Choose from recent sessions
+```
+
+Close the terminal, come back later, continue where you left off. Claude remembers everything.
+
+### `/context` — See What Claude Knows
+Visualizes your current context: loaded skills, agents, files, and memory. Useful to understand what Claude has access to.
+
+### `/usage` — Check Your Plan
+See how much of your plan you've used.
+
 ## Productivity Tips
 
 ### 1. Chain operations naturally
-"Create the file, add the tests, and run them" - Claude handles multi-step requests.
+"Create the file, add the tests, and run them" — Claude handles multi-step requests.
 
-### 2. Use context references
-"In the file you just read, change line 15 to..."
+### 2. Use `/simplify` after writing code
+It catches things you miss: duplicate logic, naming inconsistencies, unnecessary complexity.
 
-### 3. Iterate quickly
-"That's almost right, but change X to Y" - small corrections are cheap.
+### 3. Use `/commit-push-pr` for the full flow
+Don't manually commit, push, then create a PR. One command does it all.
 
-### 4. Use Claude for code review
-Before committing: "Review these changes for bugs and suggest improvements"
+### 4. Iterate quickly
+"That's almost right, but change X to Y" — small corrections are cheap.
 
-### 5. Ask for explanations
-"Explain what this function does" is free context-building for future tasks.
+### 5. Use plugins for your stack
+GitHub user? Install the `github` plugin. Using Vercel? Install `vercel`. These save enormous time.
 
 ### 6. Set up CLAUDE.md early
 10 minutes of CLAUDE.md setup saves hours of repeated corrections.
@@ -174,8 +229,8 @@ Claude knows which tools to use. Tell it WHAT you want, not HOW to do it.
 ### 9. Use `/compact` proactively
 Don't wait until you hit context limits. Compact after completing a major task.
 
-### 10. Trust but verify
-Claude is very capable but not infallible. For critical changes, always review the diff before committing.
+### 10. Use `/loop` for monitoring
+Need to keep an eye on something? `/loop 5m check the CI status` — Claude checks every 5 minutes.
 
 ---
 
@@ -185,9 +240,13 @@ Let's put it all together with a real workflow:
 
 1. **Full feature flow**: Ask Claude: "Let's do a complete workflow exercise. Create a simple TODO list module with: a data model, basic CRUD functions, and a test file. Plan first, then implement, then review the result."
 
-2. **Context management**: During the exercise above, try using `/compact` after the planning phase, and notice how the conversation stays manageable.
+2. **Simplify**: After the implementation, run `/simplify` to see if there's anything to clean up.
 
-3. **Model switching**: Try `/model` to see available models, and `/fast` to toggle fast mode.
+3. **Context management**: Try `/compact` after completing the feature, and `/context` to see what Claude has loaded.
+
+4. **Model switching**: Try `/model` to see available models, and `/fast` to toggle fast mode.
+
+5. **Session naming**: Try `/rename TODO feature exercise` to name this session for later.
 
 ---
 
@@ -200,14 +259,21 @@ C) Proactively after completing major tasks, before hitting context limits
 
 Answer: C - Regular compaction keeps your session efficient without losing important context.
 
-**Q2: What's the best way to give Claude Code instructions?**
-A) Describe WHAT you want, not HOW to do it
-B) Keep it as vague as possible so Claude has freedom
-C) Specify which tools to use step by step
+**Q2: What does `/loop 5m check CI` do?**
+A) Runs `check CI` once after 5 minutes
+B) Runs `check CI` every 5 minutes on repeat
+C) Loops through 5 CI jobs
 
-Answer: A - Tell Claude the goal and let it choose the best tools and approach.
+Answer: B - `/loop` runs a prompt on a recurring interval. Great for monitoring tasks.
 
-**Q3: How does Claude's memory persist between sessions?**
+**Q3: What's the fastest way to go from code to PR?**
+A) Manually commit, push, and create PR
+B) Use `/commit-push-pr` to do all three in one shot
+C) Use `/commit` then manually push and create PR
+
+Answer: B - `/commit-push-pr` handles the entire flow: analyzes changes, commits, pushes, and creates a PR with a proper description.
+
+**Q4: How does Claude's memory persist between sessions?**
 A) It doesn't, every session starts fresh
 B) Through memory files stored in `.claude/projects/` that are loaded automatically
 C) Through browser cookies
@@ -225,12 +291,14 @@ Here's what you've mastered:
 - **Module 2**: File operations, search, codebase navigation
 - **Module 3**: Essential bash commands and terminal skills
 - **Module 4**: Git workflow, smart commits, PRs
-- **Module 5**: Agents, Plan Mode, MCP, task tracking
-- **Module 6**: CLAUDE.md, Memory, Skills, Hooks
-- **Module 7**: Power user workflows and productivity tips
+- **Module 5**: Agents, Plan Mode, MCP, Plugins
+- **Module 6**: CLAUDE.md, Memory, Skills, Plugins, Hooks
+- **Module 7**: Power user workflows, worktrees, session management, and productivity tips
 
 ### What's Next?
 - **Build something!** The best way to learn is by doing
+- **Install key plugins**: `/plugin` to browse — start with `github` and `commit-commands`
 - **Explore skills**: `npx skills search` to find specialized skills
+- **Try `/simplify`**: Run it after writing code to catch quality issues
 - **Customize**: Refine your CLAUDE.md as you develop preferences
 - **Share**: Help others get started with Claude Code
